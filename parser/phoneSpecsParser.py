@@ -22,8 +22,6 @@ def get_subheading(row):
         result = subheading.contents[0]
     return result
 
-# if current subheading is " ", then append current info to previous subheading's info
-
 def get_phone_details(url):
     page = ""
     soup = ""
@@ -32,35 +30,30 @@ def get_phone_details(url):
     try:
         page = open_url(url)
         soup = BeautifulSoup(page)
-        phone_name = soup.title.string.split('-')[0]
-        #print phone_name
-        phone_details[phone_name] = {}
-        #print phone_details
-        #print soup
-        tables = soup.findAll("table")
+        phone_name = soup.title.string.split('-')[0]        
+        phone_details[phone_name] = {}        
+        tables = soup.findAll("table")        
+        
         for table in tables:            
             # find th in this table
             heading = table.find("th").text
             headingdict = {heading : {}}
             rows = table.findAll("tr")
-            for row in rows:
+            previous = ""
+            for row in rows:                
                 subheading = get_subheading(row)
+                # if empty tr
                 if subheading == "":
                     continue
-                info = row.findAll("td")[1].text
-                #print info
-                
-                #print info
-                headingdict[heading].update({subheading : info})
-            #print headingdict
-            phone_details[phone_name].update(headingdict)
-                
-                
+                info = row.findAll("td")[1].text                
+                # if current subheading is " ", then append current info to previous subheading's info
+                if subheading == " " and previous != "":
+                    headingdict[heading][previous] += ", " + info
+                else:
+                    headingdict[heading].update({subheading : info})
+                    previous = subheading                
             
-                
-                
-                
-            #break
+            phone_details[phone_name].update(headingdict)             
         return phone_details
         
     except TypeError, e:
@@ -70,6 +63,7 @@ if __name__ == '__main__':
     url = "http://www.gsmarena.com/apple_iphone_6-6378.php"
     phone_details = get_phone_details(url)
     print phone_details
+    
     with open('iphone6.json', 'wb') as fp:
         json.dump(phone_details, fp)
         
