@@ -7,8 +7,13 @@ print 'Content-type: text/html\n\n'
 
 with sqlite3.connect("/home/dbases/phone_details.db") as con:
     cur = con.cursor()
-    name = "Apple iPhone 6"
+    name = "Lava Iris 405+"
     query = 'select Name, Specs from PhoneSpecs where Name='+'\"' + name + '\"'    
     cur.execute(query)
-    print cur.fetchone()[1]
+    result = cur.fetchone()
+    if result is not None:
+        specs = result[1]
+        print specs
+    else:
+        print "Invalid input. Data for this phone does not exist."
     
